@@ -1,0 +1,11 @@
+2361989187152
+
+
+rfiddatasoft
+iotthink
+
+DB Name: id4061493_osms
+DB User: id4061493_osms
+DB Host: localhost
+Pass:osms123
+
