@@ -1,0 +1,5 @@
+Char occupies 1 byte. Int requires two bytes. To transmit an
+ int you need at least 2 bytes. More if you convert it to a 
+ human-readable string. To receive multibyte strings you need 
+ an end-of-string marker, for example \n, 
+or any other char that would be invalid inside the string.
