@@ -1,0 +1,174 @@
+
+LED_8_Blinking.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000086  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  000000fa  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000003  00800060  00800060  000000fa  2**0
+                  ALLOC
+  3 .comment      00000030  00000000  00000000  000000fa  2**0
+                  CONTENTS, READONLY
+  4 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  0000012c  2**2
+                  CONTENTS, READONLY
+  5 .debug_aranges 00000030  00000000  00000000  00000168  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   000003b6  00000000  00000000  00000198  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 0000033a  00000000  00000000  0000054e  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   00000154  00000000  00000000  00000888  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  00000044  00000000  00000000  000009dc  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    00000279  00000000  00000000  00000a20  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000020  00000000  00000000  00000c99  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	09 c0       	rjmp	.+18     	; 0x14 <__ctors_end>
+   2:	16 c0       	rjmp	.+44     	; 0x30 <__bad_interrupt>
+   4:	15 c0       	rjmp	.+42     	; 0x30 <__bad_interrupt>
+   6:	14 c0       	rjmp	.+40     	; 0x30 <__bad_interrupt>
+   8:	13 c0       	rjmp	.+38     	; 0x30 <__bad_interrupt>
+   a:	12 c0       	rjmp	.+36     	; 0x30 <__bad_interrupt>
+   c:	11 c0       	rjmp	.+34     	; 0x30 <__bad_interrupt>
+   e:	10 c0       	rjmp	.+32     	; 0x30 <__bad_interrupt>
+  10:	0f c0       	rjmp	.+30     	; 0x30 <__bad_interrupt>
+  12:	0e c0       	rjmp	.+28     	; 0x30 <__bad_interrupt>
+
+00000014 <__ctors_end>:
+  14:	11 24       	eor	r1, r1
+  16:	1f be       	out	0x3f, r1	; 63
+  18:	cf e9       	ldi	r28, 0x9F	; 159
+  1a:	cd bf       	out	0x3d, r28	; 61
+
+0000001c <__do_clear_bss>:
+  1c:	20 e0       	ldi	r18, 0x00	; 0
+  1e:	a0 e6       	ldi	r26, 0x60	; 96
+  20:	b0 e0       	ldi	r27, 0x00	; 0
+  22:	01 c0       	rjmp	.+2      	; 0x26 <.do_clear_bss_start>
+
+00000024 <.do_clear_bss_loop>:
+  24:	1d 92       	st	X+, r1
+
+00000026 <.do_clear_bss_start>:
+  26:	a3 36       	cpi	r26, 0x63	; 99
+  28:	b2 07       	cpc	r27, r18
+  2a:	e1 f7       	brne	.-8      	; 0x24 <.do_clear_bss_loop>
+  2c:	0e d0       	rcall	.+28     	; 0x4a <main>
+  2e:	29 c0       	rjmp	.+82     	; 0x82 <_exit>
+
+00000030 <__bad_interrupt>:
+  30:	e7 cf       	rjmp	.-50     	; 0x0 <__vectors>
+
+00000032 <adc_setup>:
+
+
+void adc_setup (void)
+{
+	// Set the ADC input to PB2/ADC1
+	ADMUX |= (1 << MUX0);
+  32:	38 9a       	sbi	0x07, 0	; 7
+	ADMUX |= (1 << ADLAR);
+  34:	3d 9a       	sbi	0x07, 5	; 7
+
+	// Set the prescaler to clock/128 & enable ADC
+	ADCSRA |= (1 << ADPS1) | (1 << ADPS0) | (1 << ADEN);
+  36:	86 b1       	in	r24, 0x06	; 6
+  38:	83 68       	ori	r24, 0x83	; 131
+  3a:	86 b9       	out	0x06, r24	; 6
+  3c:	08 95       	ret
+
+0000003e <adc_read>:
+}
+
+uint16_t adc_read (void)
+{
+	// Start the conversion
+	ADCSRA |= (1 << ADSC);
+  3e:	36 9a       	sbi	0x06, 6	; 6
+
+	// Wait for it to finish
+	while (ADCSRA & (1 << ADSC));
+  40:	36 99       	sbic	0x06, 6	; 6
+  42:	fe cf       	rjmp	.-4      	; 0x40 <__SREG__+0x1>
+
+	return ADCH;
+  44:	85 b1       	in	r24, 0x05	; 5
+}
+  46:	90 e0       	ldi	r25, 0x00	; 0
+  48:	08 95       	ret
+
+0000004a <main>:
+
+
+
+int main(void)
+{	
+	DDRB |= (1<<PB1) | (1 << PB3) | (1<< PB4);
+  4a:	87 b3       	in	r24, 0x17	; 23
+  4c:	8a 61       	ori	r24, 0x1A	; 26
+  4e:	87 bb       	out	0x17, r24	; 23
+	DDRB &=~ (1<<PB0);
+  50:	b8 98       	cbi	0x17, 0	; 23
+	
+	adc_setup();
+  52:	ef df       	rcall	.-34     	; 0x32 <adc_setup>
+	
+
+    
+    while (1) 
+    {
+		inputTemp = PINB & 0x01 ;
+  54:	86 b3       	in	r24, 0x16	; 22
+  56:	81 70       	andi	r24, 0x01	; 1
+  58:	80 93 60 00 	sts	0x0060, r24	; 0x800060 <_edata>
+		if (inputTemp == 0x01)
+  5c:	81 30       	cpi	r24, 0x01	; 1
+  5e:	11 f4       	brne	.+4      	; 0x64 <main+0x1a>
+		{
+			PORTB |= (1<<PB4);
+  60:	c4 9a       	sbi	0x18, 4	; 24
+  62:	01 c0       	rjmp	.+2      	; 0x66 <main+0x1c>
+		}
+		else
+		{
+			PORTB &=~ (1<<PB4);
+  64:	c4 98       	cbi	0x18, 4	; 24
+		}
+		
+		adc_in = adc_read();
+  66:	eb df       	rcall	.-42     	; 0x3e <adc_read>
+  68:	90 93 62 00 	sts	0x0062, r25	; 0x800062 <adc_in+0x1>
+  6c:	80 93 61 00 	sts	0x0061, r24	; 0x800061 <adc_in>
+		//pwm_write(adc_in);
+		if (adc_in > 512)
+  70:	81 30       	cpi	r24, 0x01	; 1
+  72:	92 40       	sbci	r25, 0x02	; 2
+  74:	18 f0       	brcs	.+6      	; 0x7c <main+0x32>
+		{
+			PORTB |= (1 << PB3);
+  76:	c3 9a       	sbi	0x18, 3	; 24
+			PORTB &=~ (1 << PB1);
+  78:	c1 98       	cbi	0x18, 1	; 24
+  7a:	ec cf       	rjmp	.-40     	; 0x54 <main+0xa>
+		}
+		else if(adc_in <= 512)
+		{
+			PORTB &=~ (1 << PB3);
+  7c:	c3 98       	cbi	0x18, 3	; 24
+			PORTB |= (1 << PB1);
+  7e:	c1 9a       	sbi	0x18, 1	; 24
+  80:	e9 cf       	rjmp	.-46     	; 0x54 <main+0xa>
+
+00000082 <_exit>:
+  82:	f8 94       	cli
+
+00000084 <__stop_program>:
+  84:	ff cf       	rjmp	.-2      	; 0x84 <__stop_program>
